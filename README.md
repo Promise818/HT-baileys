@@ -1,64 +1,50 @@
-<div align='center'>HT-baileys (Heavstal Tech Edition)</div>
+<div align='center'>HT-baileys</div>
 
 <div align="center">
   <img src="https://files.catbox.moe/vi3npg.png" alt="HT-baileys Banner" width="100%" />
-
-  <br/>
-  <br/>
+  <br/><br/>
 
   <a href="https://heavstal-tech.vercel.app">
-    <img src="https://img.shields.io/badge/Maintained_By-Heavstal_Tech-blue?style=for-the-badge&logo=vercel&logoColor=white" alt="Heavstal Tech" />
+    <img src="https://img.shields.io/badge/Maintainer-Heavstal_Tech-007acc?style=for-the-badge&logo=vercel&logoColor=white" alt="Heavstal Tech" />
   </a>
   <a href="https://www.npmjs.com/package/@heavstaltech/baileys">
-    <img src="https://img.shields.io/badge/NPM-@heavstaltech/baileys-red?style=for-the-badge&logo=npm&logoColor=white" alt="NPM" />
+    <img src="https://img.shields.io/badge/NPM-@heavstaltech/baileys-cb3837?style=for-the-badge&logo=npm&logoColor=white" alt="NPM" />
   </a>
   <a href="https://github.com/Promise818/HT-baileys">
-    <img src="https://img.shields.io/badge/Version-1.0.0-green?style=for-the-badge&logo=github&logoColor=white" alt="Version" />
+    <img src="https://img.shields.io/badge/Version-1.0.0-2ea44f?style=for-the-badge&logo=github&logoColor=white" alt="Version" />
   </a>
-   <img src="https://img.shields.io/badge/License-MIT-orange?style=for-the-badge" alt="License" />
-
+  <a href="https://github.com/Promise818/HT-baileys/blob/master/LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-fab005?style=for-the-badge" alt="License" />
+  </a>
 </div>
 
 ---
 
-## 🦅 Introduction
+## Introduction
 
-**HT-baileys** is the definitive, high-performance fork of the WhatsApp Web API library, re-engineered by **Heavstal Tech** (Promise818).
+**HT-baileys** is an extended fork of the WhatsApp Web API library, maintained by **Heavstal Tech**.
 
-While the original Baileys is a masterpiece of reverse engineering, **HT-baileys** is built for **Production-Grade Bots**. We took the stability of the original, integrated the feature-rich enhancements of `baileys-pro`, and injected our own proprietary **Anti-Ban Architecture** and **Custom Pairing Logic**.
+This library builds upon the stability of the original Baileys and the extended features of `baileys-pro`, offering a robust solution for enterprise-grade WhatsApp automation. It includes optimized headers for connection stability, support for custom pairing codes, and native implementation of WhatsApp Channels (Newsletters) and interactive messages.
 
-### ⚡ Why HT-baileys?
+## Installation
 
-| Feature | Original Baileys | HT-baileys |
-| :--- | :---: | :---: |
-| **Stability** | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ (Optimized for uptime) |
-| **Pairing Codes** | Random (ABCD-1234) | **Customizable** (HEAV-STAL) |
-| **Anti-Ban** | Standard Headers | **Stealth Headers** (Browser Masquerading) |
-| **Newsletters** | Basic Support | **Full Management** (Create, Edit, Follow) |
-| **Interactive Msg**| Limited | **Native Flow Support** (Buttons, Lists) |
-| **Media Handling** | Standard | **Album Support** (Grouped Media) |
-
----
-
-## 🚀 Installation
-
-Ensure you have NodeJS (v16+) installed.
-
-### Stable Release (Recommended)
+### Stable Release
 ```bash
 npm install @heavstaltech/baileys
 ```
 
-### Edge Release (Latest Features)
+### Edge Release
 ```bash
 npm install @heavstaltech/baileys@latest
 ```
 
 ---
 
-## 💻 Quick Start
+## Usage
 
-Here is the minimal code to get a socket running with the **Heavstal Configuration**.
+### Basic Connection
+
+The following example demonstrates how to initialize a socket connection using `HT-baileys`.
 
 ```ts
 import makeWASocket, { 
@@ -67,97 +53,97 @@ import makeWASocket, {
     Browsers 
 } from '@heavstaltech/baileys'
 
-async function startHeavstalBot() {
-    const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys')
+async function connectToWhatsApp() {
+    const { state, saveCreds } = await useMultiFileAuthState('auth_info')
 
     const sock = makeWASocket({
         auth: state,
-        printQRInTerminal: true, // Set to false if using Pairing Code
-        browser: Browsers.macOS("Desktop"), // Masquerade as Desktop to reduce bans
+        printQRInTerminal: false, // Set to true if using QR scanning
+        browser: Browsers.macOS("Desktop"),
         syncFullHistory: true
     })
 
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect } = update
+        
         if(connection === 'close') {
-            const shouldReconnect = (lastDisconnect.error)?.output?.statusCode !== DisconnectReason.loggedOut
-            console.log('Connection closed. Reconnecting...', shouldReconnect)
-            if(shouldReconnect) startHeavstalBot()
+            const shouldReconnect = (lastDisconnect?.error as any)?.output?.statusCode !== DisconnectReason.loggedOut
+            console.log('Connection closed. Reconnecting:', shouldReconnect)
+            
+            if(shouldReconnect) {
+                connectToWhatsApp()
+            }
         } else if(connection === 'open') {
-            console.log('🦅 HEAVSTAL CORE ONLINE')
+            console.log('Connection opened successfully')
         }
     })
 
     sock.ev.on('creds.update', saveCreds)
 }
 
-startHeavstalBot()
+connectToWhatsApp()
 ```
 
 ---
 
-## 💎 Exclusive Features
+## Features & Implementation
 
-### 1. Custom Pairing Code (The Legend Feature)
-Unlike standard libraries that force random codes, HT-baileys allows you to define your own logic for branding.
+### 1. Custom Pairing Code
+HT-baileys supports the definition of custom alphanumeric pairing codes, allowing for branded connection flows.
 
-```javascript
+```ts
 if (!sock.authState.creds.registered) {
+    // Ensure the number format is correct (Country Code + Number)
     const phoneNumber = "2349000000000"
-    
-    // The Heavstal Logic: 
-    // This allows branding the pairing experience.
-    // Note: The code format depends on WhatsApp's current server-side acceptance.
     const customCode = "HEAVSTAL" 
     
-    const code = await sock.requestPairingCode(phoneNumber, customCode)
-    console.log(`Your Pairing Code: ${code}`)
+    setTimeout(async () => {
+        const code = await sock.requestPairingCode(phoneNumber, customCode)
+        console.log(`Pairing Code: ${code}`)
+    }, 3000)
 }
 ```
 
-### 2. Newsletter (Channel) Dominance
-Full control over WhatsApp Channels. Create, edit, and manage them programmatically.
+### 2. Newsletter Management
+Provides a full suite of tools for managing WhatsApp Channels (Newsletters).
 
-<details>
-<summary><b>View Newsletter Examples</b></summary>
-
+**Create a Channel**
 ```ts
-// 1. Create a Channel
-const channel = await sock.newsletterCreate("Heavstal Updates", "Official Channel")
-
-// 2. Send Message to Channel
-await sock.sendMessage(channel.id, { text: "Hello World 🦅" })
-
-// 3. React to Channel Message
-await sock.newsletterReactMessage(channel.id, "MSG_SERVER_ID", "🔥")
-
-// 4. Update Description
-await sock.newsletterUpdateDescription(channel.id, "New Description by Bot")
+const channel = await sock.newsletterCreate("Heavstal Updates", "Official Channel Description")
+console.log("Channel Created:", channel.id)
 ```
-</details>
 
-### 3. Interactive & Button Messages
-Native flow buttons that work on both Android and iOS.
+**Update Channel Metadata**
+```ts
+await sock.newsletterUpdateName(channel.id, "Heavstal Tech")
+await sock.newsletterUpdateDescription(channel.id, "Official Updates")
+```
 
-<details>
-<summary><b>View Button Examples</b></summary>
+**Mute/Unmute**
+```ts
+await sock.newsletterMute(channel.id)
+await sock.newsletterUnmute(channel.id)
+```
+
+### 3. Interactive Messages (Buttons & Lists)
+Native support for interactive message types, including single-select lists and call-to-action buttons.
 
 ```ts
 const interactiveMessage = {
-    body: { text: "Choose your path" },
+    body: { text: "Select an option below" },
     footer: { text: "Heavstal Tech" },
-    header: { title: "Welcome", hasMediaAttachment: false },
+    header: { title: "Main Menu", hasMediaAttachment: false },
     nativeFlowMessage: {
         buttons: [
             {
                 name: "single_select",
                 buttonParamsJson: JSON.stringify({
-                    title: "Menu",
+                    title: "Tap to open",
                     sections: [{
-                        title: "Options",
+                        title: "Services",
                         rows: [
-                            { header: "STATUS", title: "System Status", id: "ping" },
-                            { header: "OWNER", title: "Contact Dev", id: "owner" }
+                            { header: "STATUS", title: "System Status", id: "status_check" },
+                            { header: "SUPPORT", title: "Contact Support", id: "contact_support" }
                         ]
                     }]
                 })
@@ -166,58 +152,49 @@ const interactiveMessage = {
     }
 }
 
-await sock.sendMessage(jid, { viewOnceMessage: { message: { interactiveMessage } } })
-```
-</details>
-
-### 4. Album Messages
-Send multiple images or videos as a single grouped bubble.
-
-```ts
-const mediaAlbum = [
-    { image: { url: "https://heavstal.com/img1.jpg" } },
-    { image: { url: "https://heavstal.com/img2.jpg" } },
-    { video: { url: "https://heavstal.com/video.mp4" } }
-]
-
-await sock.sendMessage(jid, { album: mediaAlbum, caption: "Heavstal Gallery" })
-```
-
----
-
-## 🛠️ Architecture & Debugging
-
-**HT-baileys** uses `Pino` for logging. To see the internal heartbeat of the library (useful for debugging connection issues):
-
-```ts
-import P from 'pino'
-
-const sock = makeWASocket({
-    logger: P({ level: 'debug' }) // 'info', 'debug', 'trace', 'silent'
+await sock.sendMessage(jid, { 
+    viewOnceMessage: { 
+        message: { interactiveMessage } 
+    } 
 })
 ```
 
-### The Anti-Ban Protocol
-We utilize specific browser masquerading configurations (`Browsers.macOS`, `Browsers.ubuntu`) and header optimization to make the bot traffic look indistinguishable from a real WhatsApp Web client.
+### 4. Album Messages
+Allows sending multiple media assets (Images/Videos) grouped as a single album.
+
+```ts
+const mediaContent = [
+    { image: { url: "https://example.com/image1.jpg" } },
+    { image: { url: "https://example.com/image2.jpg" } },
+    { video: { url: "https://example.com/video.mp4" } }
+]
+
+await sock.sendMessage(jid, { 
+    album: mediaContent, 
+    caption: "Media Album" 
+})
+```
+
+### 5. AI Message Flag
+Support for the `ai` property to mark messages generated by automated systems.
+
+```ts
+await sock.sendMessage(jid, { 
+    text: "Processed by AI", 
+    ai: true 
+})
+```
 
 ---
 
-## 🤝 Contributing & Support
+## Disclaimer
 
-We welcome contributions from the community!
+**HT-baileys** is an independent project maintained by **Heavstal Tech**. It is not affiliated with, authorized, maintained, sponsored, or endorsed by WhatsApp Inc. or Meta Platforms, Inc.
 
-- **Issue Tracker:** [Report Bugs](https://github.com/Promise818/HT-baileys/issues)
-- **Official Website:** [Heavstal Tech](https://heavstal-tech.vercel.app)
-- **Developer:** Promise818
-
-## ⚠️ Disclaimer
-
-This project is an independent fork and is **not** affiliated with, authorized, maintained, sponsored, or endorsed by WhatsApp or any of its affiliates or subsidiaries.
-
-**Use responsibly.** Heavstal Tech is not liable for any account bans resulting from the misuse of this library for spamming or violating WhatsApp's Terms of Service.
+This software is provided "as is", without warranty of any kind. Users are responsible for ensuring their usage complies with WhatsApp's Terms of Service. **Heavstal Tech** accepts no liability for account restrictions or bans resulting from the use of this library.
 
 ---
 
 <div align="center">
-  <sub>Built with 🖤 by <a href="https://github.com/Promise818">Promise818</a> | © 2025 Heavstal Tech</sub>
+  <sub>© 2025 Heavstal Tech. All rights reserved.</sub>
 </div>
